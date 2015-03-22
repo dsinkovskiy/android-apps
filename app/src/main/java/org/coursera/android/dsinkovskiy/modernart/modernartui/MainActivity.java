@@ -7,21 +7,22 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import java.util.Arrays;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    private static final String TAG = "ModernArtUI";
     private static final String URL = "http://www.moma.org";
 
     private LinearLayout[] rectangles;
 
-    private static final int[] colors = {Color.RED, Color.YELLOW, Color.GREEN, Color.WHITE, Color.BLUE};
+    private static final int[] RECTANGLE_COLORS = {Color.RED, Color.YELLOW, Color.GREEN,
+            Color.WHITE, Color.BLUE};
+    private static final int[] NON_CHANGING_COLORS = {Color.WHITE, Color.GRAY};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
         int i = -1;
         for (LinearLayout item : rectangles) {
             i++;
-            item.setBackgroundColor(colors[i]);
+            item.setBackgroundColor(RECTANGLE_COLORS[i]);
         }
 
         // Set change listener for seek bar to change the colors
@@ -54,7 +55,7 @@ public class MainActivity extends ActionBarActivity {
                 for (LinearLayout item : rectangles) {
                     i++;
                     item.setBackgroundColor(getChangedRectangleColor(
-                            colors[i], progress));
+                            RECTANGLE_COLORS[i], progress));
                 }
             }
 
@@ -84,7 +85,6 @@ public class MainActivity extends ActionBarActivity {
 
         if (id == R.id.more_info) {
             // Create and show the dialog box
-            Log.i(TAG, "More info option has been chosen");
             AlertDialog.Builder builder = new AlertDialog.Builder(this,
                     AlertDialog.THEME_DEVICE_DEFAULT_DARK);
             builder.setMessage(R.string.more_info_dialog_message)
@@ -110,18 +110,22 @@ public class MainActivity extends ActionBarActivity {
 
     // Colors changing logic
     private int getChangedRectangleColor (int initialColor, int progress) {
+        if (Arrays.binarySearch(NON_CHANGING_COLORS, initialColor) >= 0) {
+            return initialColor;
+        }
+
         int red = Color.red(initialColor);
         int green = Color.green(initialColor);
         int blue = Color.blue(initialColor);
 
-        red = changeColor(red, progress);
-        green = changeColor(green, progress);
-        blue = changeColor(blue, progress);
+        red = changeColorComponent(red, progress);
+        green = changeColorComponent(green, progress);
+        blue = changeColorComponent(blue, progress);
 
         return Color.rgb(red, green, blue);
     }
 
-    private int changeColor (int initialColor, int progress) {
-        return initialColor == 0 ? progress : Math.abs(progress - initialColor);
+    private int changeColorComponent (int initialColorComponent, int progress) {
+        return initialColorComponent == 0 ? progress : Math.abs(progress - initialColorComponent);
     }
 }
